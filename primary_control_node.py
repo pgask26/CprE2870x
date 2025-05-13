@@ -1,49 +1,104 @@
-import actuation
 import time
+import board
+import pwmio
+import actuation
 import networking
 import command
 import node_config
-import board
-import pwmio
 from adafruit_motor import servo
 
-#Desired set point (unused)
-desiredPoint = 50.0
+# --------------------------
+# Configuration and Globals
+# --------------------------
 
-#Track last heartbeat sent duration
+# Mode Type: Manual ("0") or Automatic ("1")
+MODE_TYPE = "0"
+
+# Temperatures
+temp1 = "0"
+temp2 = "0"
+temp3 = "0"
+
+# Desired Temperature Setpoints
+destemp1 = "0"
+destemp2 = "0"
+destemp3 = "0"
+
+# HVAC Status
+coolingstatus = "0"
+heatingstatus = "0"
+
+# Desired Damper Angles
+desDamper1 = "0"
+desDamper2 = "0"
+desDamper3 = "0"
+
+# Internal tracking
 _last_heartbeat_ns = 0
 
-#MODE TYPE (MAUNAL (0) OR AUTOMATIC (1))
-MODE_TYPE = "0"
+# --------------------------
+# MQTT Message Handling
+# --------------------------
 
 def message_received(client, topic, message):
     global MODE_TYPE
+    global destemp1, destemp2, destemp3
+    global heatingstatus, coolingstatus
+    global desDamper1, desDamper2, desDamper3
+    global temp1, temp2, temp3
+
     print(f"New message on topic {topic}: {message}")
-    #You could implement command parsing here if needed
+
     if topic == networking.OPERATION_FEED[0]:
         MODE_TYPE = message
+    elif topic == networking.COOLING_FEED[0]:
+        coolingstatus = message
+    elif topic == networking.HEATING_FEED[0]:
+        heatingstatus = message
+    elif topic == networking.SETPOINT_FEEDS[0]:
+        destemp1 = message
+    elif topic == networking.SETPOINT_FEEDS[1]:
+        destemp2 = message
+    elif topic == networking.SETPOINT_FEEDS[2]:
+        destemp3 = message
+    elif topic == networking.SET_DAMPER_FEEDS[0]:
+        desDamper1 = message
+    elif topic == networking.SET_DAMPER_FEEDS[1]:
+        desDamper2 = message
+    elif topic == networking.SET_DAMPER_FEEDS[2]:
+        desDamper3 = message
+    elif topic == networking.TEMP_FEEDS[0]:
+        temp1 = message
+    elif topic == networking.TEMP_FEEDS[1]:
+        temp2 = message
+    elif topic == networking.TEMP_FEEDS[2]:
+        temp3 = message
 
-def operation_message_received(client, topic, message):
-    global MODE_TYPE
-    print(f"OPERATION TYPE {topic}: {message}")
-    MODE_TYPE = message
-    #You could implement command parsing here if needed
+# --------------------------
+# Networking Setup
+# --------------------------
 
-#Set up networking and connections
 networking.connect_to_network()
 networking.socket_connect()
 networking.mqtt_initialize()
-#networking.mqtt_connect(feeds=networking.SETPOINT_FEEDS, message_callback=message_received) #Set points is for the temp
-#networking.mqtt_connect(feeds=networking.SET_DAMPER_FEEDS, message_callback=message_received) #Set for the damper
 
-networking.mqtt_connect(feeds=networking.COOLING_FEED + networking.HEATING_FEED + networking.OPERATION_FEED + networking.SET_DAMPER_FEEDS + networking.SETPOINT_FEEDS = networking.TEMP_FEEDS, message_callback=message_received) 
-#networking.mqtt_connect(feeds=networking.HEATING_FEED, message_callback=message_received) 
-#networking.mqtt_connect(feeds=networking.OPERATION_FEED, message_callback=operation_message_received)
+networking.mqtt_connect(
+    feeds=networking.COOLING_FEED +
+          networking.HEATING_FEED +
+          networking.OPERATION_FEED +
+          networking.SET_DAMPER_FEEDS +
+          networking.SETPOINT_FEEDS +
+          networking.TEMP_FEEDS,
+    message_callback=message_received
+)
 
-#LIST DAMPERS
-pwm1 = pwmio.PWMOut(board.A0, duty_cycle=2 ** 15, frequency=50)
-pwm2 = pwmio.PWMOut(board.A1, duty_cycle=2 ** 15, frequency=50)
-pwm3AND4 = pwmio.PWMOut(board.A2, duty_cycle=2 ** 15, frequency=50)
+# --------------------------
+# Damper Setup
+# --------------------------
+
+pwm1 = pwmio.PWMOut(board.A0, duty_cycle=2**15, frequency=50)
+pwm2 = pwmio.PWMOut(board.A1, duty_cycle=2**15, frequency=50)
+pwm3AND4 = pwmio.PWMOut(board.A2, duty_cycle=2**15, frequency=50)
 
 damper1 = servo.Servo(pwm1)
 damper2 = servo.Servo(pwm2)
@@ -53,101 +108,67 @@ damper1.angle = 45.0
 damper2.angle = 45.0
 damper3AND4.angle = 45.0
 
-#ACTUAL LIST TEMPS
-temp1 = 1.0
-temp2 = 2.0
-temp3 = 3.0
-
-#DESIRED LIST TEMPS
-destemp1 = 4.0
-destemp2 = 5.0
-destemp3 = 6.0
-
-#LISTS
 dampersList = [damper1, damper2, damper3AND4]
-tempsList = [temp1, temp2, temp3]
+
+# --------------------------
+# Main Loop
+# --------------------------
 
 def loop():
     global MODE_TYPE
-    #UPDATE INTERNAL TEMPS
-    #setAllDampers(0.0)
-    #publishDampers()
-    #time.sleep(15)
-    #setAllDampers(100.0)
-    #publishDampers()
-    #time.sleep(15)
-    
-    print(MODE_TYPE)
-    #ACT ACCORDINGLY
-    if (MODE_TYPE == "0"): #MANUAL
+    global destemp1, destemp2, destemp3
+    global heatingstatus, coolingstatus
+    global desDamper1, desDamper2, desDamper3
+    global temp1, temp2, temp3
 
+
+    print("=== Current System State ===")
+    print(f"MODE_TYPE: {MODE_TYPE}")
+    print(f"Desired Temps -> Zone 1: {destemp1}, Zone 2: {destemp2}, Zone 3: {destemp3}")
+    print(f"Actual Temperatures -> Zone 1: {temp1}, Zone 2: {temp2}, Zone 3: {temp3}")
+    print(f"Heating Status: {heatingstatus}")
+    print(f"Cooling Status: {coolingstatus}")
+    print(f"Damper Positions -> Zone 1: {desDamper1}, Zone 2: {desDamper2}, Zone 3: {desDamper3}")
+    print("============================")
+
+
+    if MODE_TYPE == "0":  # MANUAL
         print("RUNNING MANUAL")
+        #TBD
 
-    if (MODE_TYPE == "1"): #AUTOMATIC
-
+    elif MODE_TYPE == "1":  # AUTOMATIC
         print("RUNNING AUTOMATIC")
-        
-        #for i, temp in enumerate(tempsList):
-        #    set_point = desiredPoint
-        #    if temp < set_point - 1:
-        #        sendHeatORCool(command.HEAT_COOL_HEATING)
-        #    elif temp > set_point + 1:
-        #        sendHeatORCool(command.HEAT_COOL_COOLING)
-        #    else:
-        #        sendHeatORCool(command.HEAT_COOL_OFF)
+        #TBD
 
-    #PUBLISH INFORMATION
-    #publishTemps()
-    #publishDampers()
-    
-    
+    publishDampers()
+
+# --------------------------
+# Utility Functions
+# --------------------------
 
 def setAllDampers(openingPercent):
-    #See actuation for dampers
-    counter = 0
-
-    for damper in dampersList:
-        
-        setXDamper(openingPercent, counter) #Set a single damper to a specific % of opening
-        counter = counter + 1
-        
+    for i, damper in enumerate(dampersList):
+        setXDamper(openingPercent, i)
 
 def publishDampers():
-
-    iterator = 0
-    for damper in dampersList:
+    for i, damper in enumerate(dampersList):
         time.sleep(1)
-        #print(f'Damper {iterator} temp: {damper}')
-        networking.mqtt_publish_message(networking.DAMPER_FEEDS[iterator], round(((damper.angle - 55.0)/(125.0 - 55.0))*100.0))
-        iterator = iterator + 1
-
-def publishTemps():
-
-    iterator = 0
-    for temp in tempsList:
-        print(f'Zone {iterator} temp: {temp}')
-        networking.mqtt_publish_message(networking.TEMP_FEEDS[iterator], temp)
-        iterator = iterator + 1
+        angle_percent = round(((damper.angle - 55.0) / (125.0 - 55.0)) * 100.0)
+        networking.mqtt_publish_message(networking.DAMPER_FEEDS[i], angle_percent)
 
 def sendHeatORCool(mode):
-    #command.HEAT_COOL_HEATING, command.HEAT_COOL_COOLING, or command.HEAT_COOL_OFF
-
+    #TBD
     cmd = command.Command(
         type=command.TYPE_HEAT_COOL,
         values=[mode]
     )
-
     networking.socket_send_message(str(cmd))
     print(f"Sent heat/cool command: {cmd}")
 
-
-def setXDamper(openingPercent, damper): #dampers for 0-3
-    #See actuation for dampers
-
-    MIN_ANGLE = 55.0  # degrees FULLY OPEN
-    MAX_ANGLE = 125.0  # degrees FULLY CLOSED
+def setXDamper(openingPercent, damper_index):
+    MIN_ANGLE = 55.0  # Fully open
+    MAX_ANGLE = 125.0  # Fully closed
 
     angle = MIN_ANGLE + ((MAX_ANGLE - MIN_ANGLE) * (openingPercent / 100.0))
-    dampersList[damper].angle = angle
-
-    print("Angle: " + str(dampersList[damper].angle))
+    dampersList[damper_index].angle = angle
+    print("Angle: " + str(dampersList[damper_index].angle))
