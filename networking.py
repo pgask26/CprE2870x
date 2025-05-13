@@ -48,10 +48,14 @@ HEARTBEAT_MESSAGE = '0:Hello!'
 # These are the MQTT feeds used. Feeds that are lists are indexed by zone_id.
 TEMP_FEEDS = []
 SETPOINT_FEEDS = []
-COOLING_FEED = "cooling"
-HEATING_FEED = "heating"
+
+COOLING_FEED = []
+HEATING_FEED = []
+OPERATION_FEED = []
+
 COOLING_HEATING_FEED = "cooling-and-heating"
 DAMPER_FEEDS = []
+SET_DAMPER_FEEDS = []
 
 # # Set up some socket resources.
 if USE_BUILTIN_NETWORKING:
@@ -175,9 +179,14 @@ def mqtt_initialize():
     TEMP_FEEDS.extend([f"temperature-zone-{i}" for i in range(1, num_zones + 1)])
     SETPOINT_FEEDS.extend([f"set-point-zone-{i}" for i in range(1, num_zones + 1)])
     DAMPER_FEEDS.extend([f"damper-zone-{i}" for i in range(1, num_zones + 1)])
+    SET_DAMPER_FEEDS.extend([f"set-damper-pos-{i}" for i in range(1, 4)])
+
+    OPERATION_FEED.extend(["operation-switch"])
+    COOLING_FEED.extend(["cooling-switch"])
+    HEATING_FEED.extend(["heating-switch"])
 
     # Print the defined feeds for debugging purposes
-    print(f"Feeds available: {TEMP_FEEDS}, {SETPOINT_FEEDS}, {DAMPER_FEEDS}, {COOLING_HEATING_FEED}")
+    print(f"Feeds available: {TEMP_FEEDS}, {SETPOINT_FEEDS}, {DAMPER_FEEDS}, {COOLING_HEATING_FEED}, {SET_DAMPER_FEEDS}, {COOLING_FEED}, {HEATING_FEED}, {OPERATION_FEED}")
     
     if not ENABLE_MQTT:
         print("Warning: MQTT feeds created but mqtt connection not enabled")

@@ -5,28 +5,28 @@ if node_type != NODE_TYPE_SIMULATED:
 import simulation
 
 #---------LM35 code----------#
-ADC_MAX_VOLTAGE = 5.0 # Voltage range for the ADC input
+ADC_MAX_VOLTAGE = 2.5 # Voltage range for the ADC input
 ADC_MAX_VALUE = 65535 # Max value coming off the ADC
 LM35_MV_PER_C = 10.0  # millivolts per degrees Celsius
 
 # LM35 temperature sensor initialization
 # TODO: pin configuration
 if node_type == NODE_TYPE_SIMULATED:
-    lm35_adc = None
+    _lm35_pin = None
 elif board.board_id == 'unexpectedmaker_feathers2':
     # Initialize LM35 input on pin A3
     import analogio
-    lm35_adc = analogio.AnalogIn(board.A3)
+    _lm35_pin = analogio.AnalogIn(board.A3)
 else:
-    lm35_adc = None
+    _lm35_pin = None
 
 # Get a temperature reading from the LM35
 def lm35_temperature_c():
     # TODO: read from lm35 and return value in degrees C
-    if lm35_adc is None:
+    if _lm35_pin is None:
         return 0  #Return 0 if LM35 is not working right
 
-    raw_adc = lm35_adc.value  # Read ADC value
+    raw_adc = _lm35_pin.value  # Read ADC value
     voltage = (raw_adc / ADC_MAX_VALUE) * ADC_MAX_VOLTAGE  #Convert ADC reading to voltage
     temperature_c = (voltage * 1000) / LM35_MV_PER_C  #Convert millivolts to degrees Celsius
     return temperature_c
@@ -38,7 +38,7 @@ if node_type == NODE_TYPE_SIMULATED:
     _lm35_pin = None
 elif board.board_id == 'adafruit_funhouse':
     import analogio
-    #_lm35_pin = analogio.AnalogIn(board.A0)
+    _lm35_pin = analogio.AnalogIn(board.A0)
 else:
     _lm35_pin = None
 
