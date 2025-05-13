@@ -37,7 +37,8 @@ def lm35_temperature_c():
 if node_type == NODE_TYPE_SIMULATED:
     _lm35_pin = None
 elif board.board_id == 'adafruit_funhouse':
-    _lm35_pin = analogio.AnalogIn(board.A0)
+    import analogio
+    #_lm35_pin = analogio.AnalogIn(board.A0)
 else:
     _lm35_pin = None
 
