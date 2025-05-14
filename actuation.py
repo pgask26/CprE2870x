@@ -19,8 +19,6 @@ SERVO_MAX_PULSE = 2250  # us, for PWM control
 MIN_ANGLE = 45  # degrees
 MAX_ANGLE = 135  # degrees
 
-heatingPin = None
-coolingPin = None
 damper_servos = {}
 
 #if node_type == NODE_TYPE_SIMULATED:
@@ -51,11 +49,18 @@ def set_damper(zone, percent):
 # ------------ End damper control ----------- #
 
 # ------------ Heat/cool control ----------- #
-#heatingPin = digitalio.DigitalInOut(board.D13)
-#heatingPin.direction = digitalio.Direction.OUTPUT
+heatingPin = digitalio.DigitalInOut(board.D13)
+heatingPin.direction = digitalio.Direction.OUTPUT
 
-#coolingPin = digitalio.DigitalInOut(board.D9)
-#coolingPin.direction = digitalio.Direction.OUTPUT
+coolingPin1 = digitalio.DigitalInOut(board.D9)
+coolingPin1.direction = digitalio.Direction.OUTPUT
+coolingPin2 = digitalio.DigitalInOut(board.D6)
+coolingPin2.direction = digitalio.Direction.OUTPUT
+
+fanPin = digitalio.DigitalInOut(board.D12)
+fanPin.direction = digitalio.Direction.OUTPUT
+
+
 
 def set_heating(value):
     if value:
@@ -67,13 +72,18 @@ def set_heating(value):
 
 def set_cooling(value):
     if value:
-        coolingPin.value = True
+        coolingPin1.value = True
+        coolingPin2.value = True
     else:
-        coolingPin.value = False
+        coolingPin1.value = False
+        coolingPin2.value = False
 
     simulation.get_instance().cooling = value
 
 def set_circulating(value):
     # Circulation fan control (to be implemented)
-    pass
+    if value:
+        fanPin.value = True
+    else:
+        fanPin.value = False
 # ------------ End heat/cool control ----------- #

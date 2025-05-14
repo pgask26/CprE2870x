@@ -156,14 +156,15 @@ def publishDampers():
         angle_percent = round(((damper.angle - 55.0) / (125.0 - 55.0)) * 100.0)
         networking.mqtt_publish_message(networking.DAMPER_FEEDS[i], angle_percent)
 
-def sendHeatORCool(mode):
-    #TBD
-    cmd = command.Command(
-        type=command.TYPE_HEAT_COOL,
-        values=[mode]
-    )
-    networking.socket_send_message(str(cmd))
-    print(f"Sent heat/cool command: {cmd}")
+def setHeatMode(mode): #1 or 0
+    
+    time.sleep(1)
+    networking.mqtt_publish_message(networking.HEATING, mode)
+
+def setCoolMode(mode): #1 or 0
+    
+    time.sleep(1)
+    networking.mqtt_publish_message(networking.COOLING, mode)
 
 def setXDamper(openingPercent, damper_index):
     MIN_ANGLE = 55.0  # Fully open

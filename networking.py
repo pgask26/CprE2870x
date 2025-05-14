@@ -49,6 +49,9 @@ HEARTBEAT_MESSAGE = '0:Hello!'
 TEMP_FEEDS = []
 SETPOINT_FEEDS = []
 
+COOLING = []
+HEATING = []
+
 COOLING_FEED = []
 HEATING_FEED = []
 OPERATION_FEED = []
@@ -185,8 +188,11 @@ def mqtt_initialize():
     COOLING_FEED.extend(["cooling-switch"])
     HEATING_FEED.extend(["heating-switch"])
 
+    COOLING.extend(["cooling"])
+    HEATING.extend(["heating"])
+
     # Print the defined feeds for debugging purposes
-    print(f"Feeds available: {TEMP_FEEDS}, {SETPOINT_FEEDS}, {DAMPER_FEEDS}, {COOLING_HEATING_FEED}, {SET_DAMPER_FEEDS}, {COOLING_FEED}, {HEATING_FEED}, {OPERATION_FEED}")
+    print(f"Feeds available: {TEMP_FEEDS}, {SETPOINT_FEEDS}, {DAMPER_FEEDS}, {COOLING_HEATING_FEED}, {SET_DAMPER_FEEDS}, {COOLING_FEED}, {HEATING_FEED}, {OPERATION_FEED}, {HEATING}, {COOLING}")
     
     if not ENABLE_MQTT:
         print("Warning: MQTT feeds created but mqtt connection not enabled")
