@@ -1,7 +1,8 @@
 from node_config import *
 import networking
 import time
-import simulation
+if node_type == NODE_TYPE_SIMULATED:
+    import simulation
 import sensing  # Ensure this module has get_current_temperature_f()
 #import adafruit_dotstar
 import board, analogio, digitalio

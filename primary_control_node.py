@@ -208,8 +208,56 @@ def loop():
         elif MODE_TYPE == "1":  # AUTOMATIC
             print("RUNNING AUTOMATIC IN PRIMARY")
             
-            #setHeatMode("0")
-            #setCoolMode("1")
+            if (currentlyunderwork == "none"):
+                #setAllDampers(100)
+                (simulation.get_instance()).setCooling(0)
+                (simulation.get_instance()).setHeating(0)
+                
+
+            if (currentlyunderwork == "none") or (currentlyunderwork == "one"):
+                if abs(int(destemp1) - int(temp1)) >= 1:
+                    currentlyunderwork = "one"
+                    if int(destemp1) > int(temp1):
+                        (simulation.get_instance()).setCooling(0)
+                        (simulation.get_instance()).setHeating(1)
+                    elif int(destemp1) < int(temp1):
+                        (simulation.get_instance()).setCooling(1)
+                        (simulation.get_instance()).setHeating(0)
+                    
+                    #setXDamper(0, 0)
+                else:
+                    #setXDamper(100, 0)
+                    currentlyunderwork = "none"
+
+            if (currentlyunderwork == "none") or (currentlyunderwork == "two"):
+                if abs(int(destemp2) - int(temp2)) >= 1:
+                    currentlyunderwork = "two"
+                    if int(destemp2) > int(temp2):
+                        (simulation.get_instance()).setCooling(0)
+                        (simulation.get_instance()).setHeating(1)
+                    elif int(destemp2) < int(temp2):
+                        setHeatMode(0)
+                        setCoolMode(1)
+
+                    #setXDamper(0, 1)
+                else:
+                    #setXDamper(100, 1)
+                    currentlyunderwork = "none"
+
+            if (currentlyunderwork == "none") or (currentlyunderwork == "three"):
+                if abs(int(destemp3) - int(temp3)) >= 1:
+                    currentlyunderwork = "three"
+                    if int(destemp3) > int(temp3):
+                        (simulation.get_instance()).setCooling(0)
+                        (simulation.get_instance()).setHeating(1)
+                    elif int(destemp3) < int(temp3):
+                        (simulation.get_instance()).setCooling(1)
+                        (simulation.get_instance()).setHeating(0)
+
+                    #setXDamper(0, 2)
+                else:
+                    #setXDamper(100, 2)
+                    currentlyunderwork = "none"
             
             #TBD
 
@@ -220,6 +268,7 @@ def loop():
 # --------------------------
 
 def setAllDampers(openingPercent):
+    
     for i, damper in enumerate(dampersList):
         setXDamper(openingPercent, i)
 
@@ -230,15 +279,13 @@ def publishDampers():
             angle_percent = round(((damper.angle - 55.0) / (125.0 - 55.0)) * 100.0)
             networking.mqtt_publish_message(networking.DAMPER_FEEDS[i], angle_percent)
     else:
-        time.sleep(1)
+        
         angle_percent = round(float(desDamper1))
         networking.mqtt_publish_message(networking.DAMPER_FEEDS[0], angle_percent)
         
-        time.sleep(1)
         angle_percent = round(float(desDamper2))
         networking.mqtt_publish_message(networking.DAMPER_FEEDS[1], angle_percent)
 
-        time.sleep(1)
         angle_percent = round(float(desDamper3))
         networking.mqtt_publish_message(networking.DAMPER_FEEDS[2], angle_percent)
 
