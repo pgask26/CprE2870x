@@ -1,3 +1,4 @@
+from node_config import *
 import time
 import board
 import pwmio
@@ -95,19 +96,20 @@ networking.mqtt_connect(
 # Damper Setup
 # --------------------------
 
-pwm1 = pwmio.PWMOut(board.A0, duty_cycle=2**15, frequency=50)
-pwm2 = pwmio.PWMOut(board.A1, duty_cycle=2**15, frequency=50)
-pwm3AND4 = pwmio.PWMOut(board.A2, duty_cycle=2**15, frequency=50)
+if node_type != NODE_TYPE_SIMULATED:
+    pwm1 = pwmio.PWMOut(board.A0, duty_cycle=2**15, frequency=50)
+    pwm2 = pwmio.PWMOut(board.A1, duty_cycle=2**15, frequency=50)
+    pwm3AND4 = pwmio.PWMOut(board.A2, duty_cycle=2**15, frequency=50)
 
-damper1 = servo.Servo(pwm1)
-damper2 = servo.Servo(pwm2)
-damper3AND4 = servo.Servo(pwm3AND4)
+    damper1 = servo.Servo(pwm1)
+    damper2 = servo.Servo(pwm2)
+    damper3AND4 = servo.Servo(pwm3AND4)
 
-damper1.angle = 55.0
-damper2.angle = 55.0
-damper3AND4.angle = 55.0
+    damper1.angle = 55.0
+    damper2.angle = 55.0
+    damper3AND4.angle = 55.0
 
-dampersList = [damper1, damper2, damper3AND4]
+    dampersList = [damper1, damper2, damper3AND4]
 
 # --------------------------
 # Main Loop
@@ -130,17 +132,28 @@ def loop():
     #print(f"Damper Positions -> Zone 1: {desDamper1}, Zone 2: {desDamper2}, Zone 3: {desDamper3}")
     #print("============================")
 
+    if node_type != NODE_TYPE_SIMULATED:
+        if MODE_TYPE == "0":  # MANUAL
+            print("RUNNING MANUAL")
+            setXDamper(float(desDamper1), 0)
+            setXDamper(float(desDamper2), 1)
+            setXDamper(float(desDamper3), 2)
+            #TBD
 
-    if MODE_TYPE == "0":  # MANUAL
-        print("RUNNING MANUAL")
-        setXDamper(float(desDamper1), 0)
-        setXDamper(float(desDamper2), 1)
-        setXDamper(float(desDamper3), 2)
-        #TBD
+        elif MODE_TYPE == "1":  # AUTOMATIC
+            print("RUNNING AUTOMATIC")
+            #TBD
+    else:
+        if MODE_TYPE == "0":  # MANUAL
+            print("RUNNING MANUAL")
+            
+            #TBD
 
-    elif MODE_TYPE == "1":  # AUTOMATIC
-        print("RUNNING AUTOMATIC")
-        #TBD
+        elif MODE_TYPE == "1":  # AUTOMATIC
+            print("RUNNING AUTOMATIC")
+
+            
+            #TBD
 
     publishDampers()
 
@@ -153,10 +166,23 @@ def setAllDampers(openingPercent):
         setXDamper(openingPercent, i)
 
 def publishDampers():
-    for i, damper in enumerate(dampersList):
+    if node_type != NODE_TYPE_SIMULATED:
+        for i, damper in enumerate(dampersList):
+            time.sleep(1)
+            angle_percent = round(((damper.angle - 55.0) / (125.0 - 55.0)) * 100.0)
+            networking.mqtt_publish_message(networking.DAMPER_FEEDS[i], angle_percent)
+    else:
         time.sleep(1)
-        angle_percent = round(((damper.angle - 55.0) / (125.0 - 55.0)) * 100.0)
-        networking.mqtt_publish_message(networking.DAMPER_FEEDS[i], angle_percent)
+        angle_percent = round(float(desDamper1))
+        networking.mqtt_publish_message(networking.DAMPER_FEEDS[0], angle_percent)
+        
+        time.sleep(1)
+        angle_percent = round(float(desDamper2))
+        networking.mqtt_publish_message(networking.DAMPER_FEEDS[1], angle_percent)
+
+        time.sleep(1)
+        angle_percent = round(float(desDamper3))
+        networking.mqtt_publish_message(networking.DAMPER_FEEDS[2], angle_percent)
 
 def setHeatMode(mode): #1 or 0
     
@@ -169,9 +195,11 @@ def setCoolMode(mode): #1 or 0
     networking.mqtt_publish_message(networking.COOLING[0], mode)
 
 def setXDamper(openingPercent, damper_index):
-    MIN_ANGLE = 55.0  # Fully open
-    MAX_ANGLE = 125.0  # Fully closed
 
-    angle = MIN_ANGLE + ((MAX_ANGLE - MIN_ANGLE) * (openingPercent / 100.0))
-    dampersList[damper_index].angle = angle
-    print("Angle: " + str(dampersList[damper_index].angle))
+    if node_type != NODE_TYPE_SIMULATED:
+        MIN_ANGLE = 55.0  # Fully open
+        MAX_ANGLE = 125.0  # Fully closed
+
+        angle = MIN_ANGLE + ((MAX_ANGLE - MIN_ANGLE) * (openingPercent / 100.0))
+        dampersList[damper_index].angle = angle
+        print("Angle: " + str(dampersList[damper_index].angle))

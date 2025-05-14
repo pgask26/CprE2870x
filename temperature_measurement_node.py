@@ -37,6 +37,13 @@ _prev_time = time.monotonic_ns()
 def loop():
     global _prev_time
     global last_values
+    
+    if node_type == NODE_TYPE_SIMULATED:
+        for zone in num_zones
+            sim.get_temperature_f(zone)
+            time.sleep(1)
+            networking.mqtt_publish_message(networking.TEMP_FEEDS[zone], current_temp)
+
     curr_time = time.monotonic_ns()
     if curr_time - _prev_time < LOOP_INTERVAL_NS:
         return

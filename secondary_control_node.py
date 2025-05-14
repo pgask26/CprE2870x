@@ -1,6 +1,8 @@
+from node_config import *
 import command
 import networking
-import actuation
+if node_type != NODE_TYPE_SIMULATED:
+    import actuation
 import time
 
 # Track the last time a heartbeat was received
@@ -113,78 +115,143 @@ def loop():
     print(f"heatingRECIEVED: {heatingRECIEVED}")
     print(" ")
 
-    if MODE_TYPE == "0":  # MANUAL
-        print("RUNNING MANUAL")
+    if node_type != NODE_TYPE_SIMULATED:
+        if MODE_TYPE == "0":  # MANUAL
+            print("RUNNING MANUAL")
 
-        if coolingstatus != heatingstatus:
-        
-            if coolingstatus == "1":
-
-                #actuation.set_circulating(1)
-                actuation.set_heating(0)
-                actuation.set_cooling(1)
-                print("COOLING IS ON")
-            elif heatingstatus == "1":
-
-                #actuation.set_circulating(1)
-                actuation.set_cooling(0)
-                actuation.set_heating(1)
-                print("HEATING IS ON")
-
-        if coolingstatus == "0":
-
-            actuation.set_cooling(0)
-            print("COOLING IS OFF")
-        if heatingstatus == "0":
-
-            actuation.set_heating(0)
-            print("HEATING IS OFF")
-
-        if coolingstatus == heatingstatus:
-
-            #actuation.set_circulating(0)
-            print("NEITHER ARE ON")
-
-        if fanstatus == "1":
-
-            actuation.set_circulating(1)
-        elif fanstatus == "0":
+            if coolingstatus != heatingstatus:
             
-            actuation.set_circulating(0)
+                if coolingstatus == "1":
 
+                    #actuation.set_circulating(1)
+                    actuation.set_heating(0)
+                    actuation.set_cooling(1)
+                    print("COOLING IS ON")
+                elif heatingstatus == "1":
 
-    elif MODE_TYPE == "1":  # AUTOMATIC
-        print("RUNNING AUTOMATIC")
+                    #actuation.set_circulating(1)
+                    actuation.set_cooling(0)
+                    actuation.set_heating(1)
+                    print("HEATING IS ON")
 
-        if coolingRECIEVED != heatingRECIEVED:
-
-            if coolingRECIEVED == "1":
-
-                actuation.set_circulating(1)
-                actuation.set_heating(0)
-                actuation.set_cooling(1)
-                print("COOLING IS ON")
-            elif heatingRECIEVED == "1":
-
-                actuation.set_circulating(1)
+            if coolingstatus == "0":
+                
                 actuation.set_cooling(0)
-                actuation.set_heating(1)
-                print("HEATING IS ON")
+                print("COOLING IS OFF")
+            if heatingstatus == "0":
 
-        if coolingRECIEVED == "0":
+                actuation.set_heating(0)
+                print("HEATING IS OFF")
 
-            actuation.set_cooling(0)
-            print("COOLING IS OFF")
-        if heatingRECIEVED == "0":
+            if coolingstatus == heatingstatus:
 
-            actuation.set_heating(0)
-            print("HEATING IS OFF")
+                #actuation.set_circulating(0)
+                print("NEITHER ARE ON")
 
-        if coolingRECIEVED == heatingRECIEVED:
+            if fanstatus == "1":
 
-            actuation.set_circulating(0)
-            print("NEITHER ARE ON")
+                actuation.set_circulating(1)
+            elif fanstatus == "0":
+                
+                actuation.set_circulating(0)
 
+
+        elif MODE_TYPE == "1":  # AUTOMATIC
+            print("RUNNING AUTOMATIC")
+
+            if coolingRECIEVED != heatingRECIEVED:
+
+                if coolingRECIEVED == "1":
+
+                    actuation.set_circulating(1)
+                    actuation.set_heating(0)
+                    actuation.set_cooling(1)
+                    print("COOLING IS ON")
+                elif heatingRECIEVED == "1":
+
+                    actuation.set_circulating(1)
+                    actuation.set_cooling(0)
+                    actuation.set_heating(1)
+                    print("HEATING IS ON")
+
+            if coolingRECIEVED == "0":
+
+                actuation.set_cooling(0)
+                print("COOLING IS OFF")
+            if heatingRECIEVED == "0":
+
+                actuation.set_heating(0)
+                print("HEATING IS OFF")
+
+            if coolingRECIEVED == heatingRECIEVED:
+
+                actuation.set_circulating(0)
+                print("NEITHER ARE ON")
+    else:
+        if MODE_TYPE == "0":  # MANUAL
+            print("RUNNING MANUAL")
+
+            if coolingstatus != heatingstatus:
+            
+                if coolingstatus == "1":
+
+                    
+                    print("COOLING IS ON")
+                elif heatingstatus == "1":
+
+                    
+                    print("HEATING IS ON")
+
+            if coolingstatus == "0":
+                
+                
+                print("COOLING IS OFF")
+            if heatingstatus == "0":
+
+                
+                print("HEATING IS OFF")
+
+            if coolingstatus == heatingstatus:
+
+                
+                print("NEITHER ARE ON")
+
+            if fanstatus == "1":
+
+                
+                print("FAN ON")
+            elif fanstatus == "0":
+                
+                print("FAN OFF")
+
+
+        elif MODE_TYPE == "1":  # AUTOMATIC
+            print("RUNNING AUTOMATIC")
+
+            if coolingRECIEVED != heatingRECIEVED:
+
+                if coolingRECIEVED == "1":
+
+                    
+                    print("COOLING IS ON")
+                elif heatingRECIEVED == "1":
+
+                   
+                    print("HEATING IS ON")
+
+            if coolingRECIEVED == "0":
+
+                
+                print("COOLING IS OFF")
+            if heatingRECIEVED == "0":
+
+                
+                print("HEATING IS OFF")
+
+            if coolingRECIEVED == heatingRECIEVED:
+
+                
+                print("NEITHER ARE ON")
 
     
     

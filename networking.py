@@ -225,7 +225,8 @@ def mqtt_connect(feeds = [], message_callback = None):
         # If we are connected and were given feeds to subscribe to, we can do that now.
         for feed in [f for f in feeds if f not in _subscribed_feeds]:
             print(f"Listening for topic changes on {feed}")
-            mqtt_client.subscribe(feed)
+            if node_type != NODE_TYPE_SIMULATED:
+                mqtt_client.subscribe(feed)
             _subscribed_feeds.append(feed)
 
     # This error will be thrown if we're not connected.

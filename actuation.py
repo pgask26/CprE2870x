@@ -49,16 +49,17 @@ def set_damper(zone, percent):
 # ------------ End damper control ----------- #
 
 # ------------ Heat/cool control ----------- #
-heatingPin = digitalio.DigitalInOut(board.D13)
-heatingPin.direction = digitalio.Direction.OUTPUT
+if node_type != NODE_TYPE_SIMULATED:
+    heatingPin = digitalio.DigitalInOut(board.D13)
+    heatingPin.direction = digitalio.Direction.OUTPUT
 
-coolingPin1 = digitalio.DigitalInOut(board.D9)
-coolingPin1.direction = digitalio.Direction.OUTPUT
-coolingPin2 = digitalio.DigitalInOut(board.D6)
-coolingPin2.direction = digitalio.Direction.OUTPUT
+    coolingPin1 = digitalio.DigitalInOut(board.D9)
+    coolingPin1.direction = digitalio.Direction.OUTPUT
+    coolingPin2 = digitalio.DigitalInOut(board.D6)
+    coolingPin2.direction = digitalio.Direction.OUTPUT
 
-fanPin = digitalio.DigitalInOut(board.D12)
-fanPin.direction = digitalio.Direction.OUTPUT
+    fanPin = digitalio.DigitalInOut(board.D12)
+    fanPin.direction = digitalio.Direction.OUTPUT
 
 
 
