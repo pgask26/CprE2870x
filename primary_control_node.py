@@ -1,7 +1,6 @@
 import time
 import board
 import pwmio
-import actuation
 import networking
 import command
 import node_config
@@ -87,8 +86,8 @@ networking.mqtt_connect(
           networking.HEATING_FEED +
           networking.OPERATION_FEED +
           networking.SET_DAMPER_FEEDS +
-          networking.SETPOINT_FEEDS +
-          networking.TEMP_FEEDS,
+          networking.TEMP_FEEDS +
+          networking.SETPOINT_FEEDS,
     message_callback=message_received
 )
 
@@ -104,9 +103,9 @@ damper1 = servo.Servo(pwm1)
 damper2 = servo.Servo(pwm2)
 damper3AND4 = servo.Servo(pwm3AND4)
 
-damper1.angle = 45.0
-damper2.angle = 45.0
-damper3AND4.angle = 45.0
+damper1.angle = 55.0
+damper2.angle = 55.0
+damper3AND4.angle = 55.0
 
 dampersList = [damper1, damper2, damper3AND4]
 
@@ -122,18 +121,21 @@ def loop():
     global temp1, temp2, temp3
 
 
-    print("=== Current System State ===")
-    print(f"MODE_TYPE: {MODE_TYPE}")
-    print(f"Desired Temps -> Zone 1: {destemp1}, Zone 2: {destemp2}, Zone 3: {destemp3}")
-    print(f"Actual Temperatures -> Zone 1: {temp1}, Zone 2: {temp2}, Zone 3: {temp3}")
-    print(f"Heating Status: {heatingstatus}")
-    print(f"Cooling Status: {coolingstatus}")
-    print(f"Damper Positions -> Zone 1: {desDamper1}, Zone 2: {desDamper2}, Zone 3: {desDamper3}")
-    print("============================")
+    #print("=== Current System State ===")
+    #print(f"MODE_TYPE: {MODE_TYPE}")
+    #print(f"Desired Temps -> Zone 1: {destemp1}, Zone 2: {destemp2}, Zone 3: {destemp3}")
+    #print(f"Actual Temperatures -> Zone 1: {temp1}, Zone 2: {temp2}, Zone 3: {temp3}")
+    #print(f"Heating Status: {heatingstatus}")
+    #print(f"Cooling Status: {coolingstatus}")
+    #print(f"Damper Positions -> Zone 1: {desDamper1}, Zone 2: {desDamper2}, Zone 3: {desDamper3}")
+    #print("============================")
 
 
     if MODE_TYPE == "0":  # MANUAL
         print("RUNNING MANUAL")
+        setXDamper(float(desDamper1), 0)
+        setXDamper(float(desDamper2), 1)
+        setXDamper(float(desDamper3), 2)
         #TBD
 
     elif MODE_TYPE == "1":  # AUTOMATIC
@@ -159,12 +161,12 @@ def publishDampers():
 def setHeatMode(mode): #1 or 0
     
     time.sleep(1)
-    networking.mqtt_publish_message(networking.HEATING, mode)
+    networking.mqtt_publish_message(networking.HEATING[0], mode)
 
 def setCoolMode(mode): #1 or 0
     
     time.sleep(1)
-    networking.mqtt_publish_message(networking.COOLING, mode)
+    networking.mqtt_publish_message(networking.COOLING[0], mode)
 
 def setXDamper(openingPercent, damper_index):
     MIN_ANGLE = 55.0  # Fully open

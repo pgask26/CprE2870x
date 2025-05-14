@@ -60,6 +60,8 @@ COOLING_HEATING_FEED = "cooling-and-heating"
 DAMPER_FEEDS = []
 SET_DAMPER_FEEDS = []
 
+FAN_FEED = []
+
 # # Set up some socket resources.
 if USE_BUILTIN_NETWORKING:
     # The CPython socket module seems to work as a drop-in replacement for CircuitPython's SocketPool.
@@ -188,11 +190,12 @@ def mqtt_initialize():
     COOLING_FEED.extend(["cooling-switch"])
     HEATING_FEED.extend(["heating-switch"])
 
+    FAN_FEED.extend(["fan-switch"])
     COOLING.extend(["cooling"])
     HEATING.extend(["heating"])
 
     # Print the defined feeds for debugging purposes
-    print(f"Feeds available: {TEMP_FEEDS}, {SETPOINT_FEEDS}, {DAMPER_FEEDS}, {COOLING_HEATING_FEED}, {SET_DAMPER_FEEDS}, {COOLING_FEED}, {HEATING_FEED}, {OPERATION_FEED}, {HEATING}, {COOLING}")
+    print(f"Feeds available: {TEMP_FEEDS}, {SETPOINT_FEEDS}, {DAMPER_FEEDS}, {COOLING_HEATING_FEED}, {SET_DAMPER_FEEDS}, {COOLING_FEED}, {HEATING_FEED}, {OPERATION_FEED}, {HEATING}, {COOLING}, {FAN_FEED}")
     
     if not ENABLE_MQTT:
         print("Warning: MQTT feeds created but mqtt connection not enabled")

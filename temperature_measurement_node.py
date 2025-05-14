@@ -24,6 +24,7 @@ networking.mqtt_connect()
 
 # The previously reported temperature values.
 prev_temps = [None] * num_zones
+last_values = [1, 2, 3]
 
 # Initialize DotStar LED (Fixed)
 #led = adafruit_dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1, brightness=0.2)
@@ -35,6 +36,7 @@ _prev_time = time.monotonic_ns()
 # Runs periodic node tasks.
 def loop():
     global _prev_time
+    global last_values
     curr_time = time.monotonic_ns()
     if curr_time - _prev_time < LOOP_INTERVAL_NS:
         return
@@ -46,9 +48,11 @@ def loop():
     if node_type == NODE_TYPE_SIMULATED:
         zones = [i for i in range(num_zones)]
 
+    i = 0
     for zone in zones:
         # Get current temperature from sensing module
         current_temp = sensing.get_current_temperature_f(zone)
+        current_temp = round(current_temp)
 
         print(f'Zone {zone} temp: {current_temp}')
 
@@ -61,4 +65,8 @@ def loop():
         #     led[0] = (255, 0, 0)
 
         # Optional: Add logic to only report significant temperature changes
-        networking.mqtt_publish_message(networking.TEMP_FEEDS[zone], current_temp)
+
+        if abs(last_values[i] - current_temp) >= 2:
+            networking.mqtt_publish_message(networking.TEMP_FEEDS[zone], current_temp)
+            last_values[i] = current_temp
+            i = i + 1
