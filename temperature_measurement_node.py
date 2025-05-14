@@ -66,7 +66,7 @@ def loop():
 
         # Optional: Add logic to only report significant temperature changes
 
-        if abs(last_values[i] - current_temp) >= 2:
+        if abs(last_values[i] - current_temp) >= 1:
             networking.mqtt_publish_message(networking.TEMP_FEEDS[zone], current_temp)
             last_values[i] = current_temp
             i = i + 1
