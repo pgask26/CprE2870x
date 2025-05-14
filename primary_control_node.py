@@ -39,6 +39,8 @@ desDamper3 = "0"
 # Internal tracking
 _last_heartbeat_ns = 0
 
+currentlyunderwork = "none"
+
 # --------------------------
 # MQTT Message Handling
 # --------------------------
@@ -124,6 +126,7 @@ def loop():
     global heatingstatus, coolingstatus
     global desDamper1, desDamper2, desDamper3
     global temp1, temp2, temp3
+    global currentlyunderwork
 
 
     #print("=== Current System State ===")
@@ -145,7 +148,58 @@ def loop():
 
         elif MODE_TYPE == "1":  # AUTOMATIC
             print("RUNNING AUTOMATIC")
-            #TBD
+            
+            if (currentlyunderwork == "none"):
+                setAllDampers(100)
+                setCoolMode(0)
+                setHeatMode(0)
+                
+
+            if (currentlyunderwork == "none") or (currentlyunderwork == "one"):
+                if abs(int(destemp1) - int(temp1)) >= 1:
+                    currentlyunderwork = "one"
+                    if int(destemp1) > int(temp1):
+                        setHeatMode(1)
+                        setCoolMode(0)
+                    elif int(destemp1) < int(temp1):
+                        setHeatMode(0)
+                        setCoolMode(1)
+                    
+                    setXDamper(0, 0)
+                else:
+                    setXDamper(100, 0)
+                    currentlyunderwork = "none"
+
+            if (currentlyunderwork == "none") or (currentlyunderwork == "two"):
+                if abs(int(destemp2) - int(temp2)) >= 1:
+                    currentlyunderwork = "two"
+                    if int(destemp2) > int(temp2):
+                        setHeatMode(1)
+                        setCoolMode(0)
+                    elif int(destemp2) < int(temp2):
+                        setHeatMode(0)
+                        setCoolMode(1)
+
+                    setXDamper(0, 1)
+                else:
+                    setXDamper(100, 1)
+                    currentlyunderwork = "none"
+
+            if (currentlyunderwork == "none") or (currentlyunderwork == "three"):
+                if abs(int(destemp3) - int(temp3)) >= 1:
+                    currentlyunderwork = "three"
+                    if int(destemp3) > int(temp3):
+                        setHeatMode(1)
+                        setCoolMode(0)
+                    elif int(destemp3) < int(temp3):
+                        setHeatMode(0)
+                        setCoolMode(1)
+
+                    setXDamper(0, 2)
+                else:
+                    setXDamper(100, 2)
+                    currentlyunderwork = "none"
+            
     else:
         if MODE_TYPE == "0":  # MANUAL
             print("RUNNING MANUAL")
@@ -153,20 +207,9 @@ def loop():
 
         elif MODE_TYPE == "1":  # AUTOMATIC
             print("RUNNING AUTOMATIC IN PRIMARY")
-            temps = [temp1, temp2, temp3]
-            desiTemps = [destemp1, destemp2, destemp3]
-
-            for temp, desiTemp in zip(temps, desiTemps):
-                if temp > desiTemp:
-                    print("YES IM HERE 1")
-                    setHeatMode("0")
-                    setCoolMode("1")
-                    
-                elif temp < desiTemp:
-                    print("YES IM HERE 2")
-                    setCoolMode("0")
-                    setHeatMode("1")
-
+            
+            #setHeatMode("0")
+            #setCoolMode("1")
             
             #TBD
 
@@ -183,7 +226,7 @@ def setAllDampers(openingPercent):
 def publishDampers():
     if node_type != NODE_TYPE_SIMULATED:
         for i, damper in enumerate(dampersList):
-            time.sleep(1)
+            
             angle_percent = round(((damper.angle - 55.0) / (125.0 - 55.0)) * 100.0)
             networking.mqtt_publish_message(networking.DAMPER_FEEDS[i], angle_percent)
     else:
@@ -201,12 +244,12 @@ def publishDampers():
 
 def setHeatMode(mode): #1 or 0
     
-    time.sleep(1)
+    
     networking.mqtt_publish_message(networking.HEATING[0], mode)
 
 def setCoolMode(mode): #1 or 0
     
-    time.sleep(1)
+    
     networking.mqtt_publish_message(networking.COOLING[0], mode)
 
 def setXDamper(openingPercent, damper_index):
@@ -217,4 +260,4 @@ def setXDamper(openingPercent, damper_index):
 
         angle = MIN_ANGLE + ((MAX_ANGLE - MIN_ANGLE) * (openingPercent / 100.0))
         dampersList[damper_index].angle = angle
-        print("Angle: " + str(dampersList[damper_index].angle))
+        #print("Angle: " + str(dampersList[damper_index].angle))

@@ -225,5 +225,5 @@ def loop():
                 print("NEITHER ARE ON")
 
 
-    networking.loop()
-    time.sleep(0.1)
+    #networking.loop()
+    #time.sleep(0.1)
