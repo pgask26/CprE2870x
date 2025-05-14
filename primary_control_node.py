@@ -5,6 +5,9 @@ import pwmio
 import networking
 import command
 import node_config
+import simulation
+if node_type == NODE_TYPE_SIMULATED:
+    import secondary_control_node
 from adafruit_motor import servo
 
 # --------------------------
@@ -146,11 +149,23 @@ def loop():
     else:
         if MODE_TYPE == "0":  # MANUAL
             print("RUNNING MANUAL")
-            
             #TBD
 
         elif MODE_TYPE == "1":  # AUTOMATIC
-            print("RUNNING AUTOMATIC")
+            print("RUNNING AUTOMATIC IN PRIMARY")
+            temps = [temp1, temp2, temp3]
+            desiTemps = [destemp1, destemp2, destemp3]
+
+            for temp, desiTemp in zip(temps, desiTemps):
+                if temp > desiTemp:
+                    print("YES IM HERE 1")
+                    setHeatMode("0")
+                    setCoolMode("1")
+                    
+                elif temp < desiTemp:
+                    print("YES IM HERE 2")
+                    setCoolMode("0")
+                    setHeatMode("1")
 
             
             #TBD

@@ -1,6 +1,7 @@
 from node_config import *
 import networking
 import time
+import simulation
 import sensing  # Ensure this module has get_current_temperature_f()
 #import adafruit_dotstar
 import board, analogio, digitalio
@@ -39,11 +40,13 @@ def loop():
     global last_values
     
     if node_type == NODE_TYPE_SIMULATED:
-        for zone in num_zones
-            sim.get_temperature_f(zone)
+        
+        for zone in range(num_zones):
+            tempFromZone = (simulation.get_instance()).get_temperature_f(zone)
+            #print("HELP ME HELPPP" + str(tempFromZone))
             time.sleep(1)
-            networking.mqtt_publish_message(networking.TEMP_FEEDS[zone], current_temp)
-
+            networking.mqtt_publish_message(networking.TEMP_FEEDS[zone], tempFromZone)
+        
     curr_time = time.monotonic_ns()
     if curr_time - _prev_time < LOOP_INTERVAL_NS:
         return
@@ -55,25 +58,26 @@ def loop():
     if node_type == NODE_TYPE_SIMULATED:
         zones = [i for i in range(num_zones)]
 
-    i = 0
-    for zone in zones:
-        # Get current temperature from sensing module
-        current_temp = sensing.get_current_temperature_f(zone)
-        current_temp = round(current_temp)
+    if node_type != NODE_TYPE_SIMULATED:
+        i = 0
+        for zone in zones:
+            # Get current temperature from sensing module
+            current_temp = sensing.get_current_temperature_f(zone)
+            current_temp = round(current_temp)
 
-        print(f'Zone {zone} temp: {current_temp}')
+            print(f'Zone {zone} temp: {current_temp}')
 
-        # Change LED color based on temperature range
-        # if current_temp < 65:  # Cold (Blue)
-        #     led[0] = (0, 0, 255)  
-        # elif 65 <= current_temp < 75:  # Comfortable (Green)
-        #     led[0] = (0, 255, 0)
-        # elif current_temp >= 75:  # Hot (Red)
-        #     led[0] = (255, 0, 0)
+            # Change LED color based on temperature range
+            # if current_temp < 65:  # Cold (Blue)
+            #     led[0] = (0, 0, 255)  
+            # elif 65 <= current_temp < 75:  # Comfortable (Green)
+            #     led[0] = (0, 255, 0)
+            # elif current_temp >= 75:  # Hot (Red)
+            #     led[0] = (255, 0, 0)
 
-        # Optional: Add logic to only report significant temperature changes
+            # Optional: Add logic to only report significant temperature changes
 
-        if abs(last_values[i] - current_temp) >= 1:
-            networking.mqtt_publish_message(networking.TEMP_FEEDS[zone], current_temp)
-            last_values[i] = current_temp
-            i = i + 1
+            if abs(last_values[i] - current_temp) >= 1:
+                networking.mqtt_publish_message(networking.TEMP_FEEDS[zone], current_temp)
+                last_values[i] = current_temp
+                i = i + 1

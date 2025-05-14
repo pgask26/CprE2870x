@@ -31,7 +31,7 @@ class Simulation:
        for i in range(num_zones):
            self.zoneTemps.append(i)
            self.dampPerct.append(i)
-           self.zoneTemps[i] = 0.0 #whatever inital temperture here
+           self.zoneTemps[i] = 65.0 #whatever inital temperture here
            self.dampPerct[i] = 100/100 #whatever inital temperture here
         
 
@@ -53,6 +53,8 @@ class Simulation:
         elapsedTimeSeconds = elapsed_time_ms/1_000_000_000
             
         for i in range(num_zones):
+            self.zoneTemps[i] -= 0.1 #AMBI TEMP VARYMENT HERE
+
             if self.heating:
                 self.zoneTemps[i] += 1 * self.dampPerct[i] * elapsedTimeSeconds
             if self.cooling:

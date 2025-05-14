@@ -4,6 +4,7 @@ import networking
 if node_type != NODE_TYPE_SIMULATED:
     import actuation
 import time
+import simulation
 
 # Track the last time a heartbeat was received
 _last_heartbeat_received = time.monotonic_ns()
@@ -190,72 +191,38 @@ def loop():
     else:
         if MODE_TYPE == "0":  # MANUAL
             print("RUNNING MANUAL")
-
-            if coolingstatus != heatingstatus:
-            
-                if coolingstatus == "1":
-
-                    
-                    print("COOLING IS ON")
-                elif heatingstatus == "1":
-
-                    
-                    print("HEATING IS ON")
-
-            if coolingstatus == "0":
-                
-                
-                print("COOLING IS OFF")
-            if heatingstatus == "0":
-
-                
-                print("HEATING IS OFF")
-
-            if coolingstatus == heatingstatus:
-
-                
-                print("NEITHER ARE ON")
-
-            if fanstatus == "1":
-
-                
-                print("FAN ON")
-            elif fanstatus == "0":
-                
-                print("FAN OFF")
+            #NO NEED TO DO
 
 
         elif MODE_TYPE == "1":  # AUTOMATIC
-            print("RUNNING AUTOMATIC")
+            print("RUNNING AUTOMATIC IN SECONDARY")
 
             if coolingRECIEVED != heatingRECIEVED:
 
                 if coolingRECIEVED == "1":
 
-                    
+                    (simulation.get_instance()).setCooling(1)
+                    (simulation.get_instance()).setHeating(0)
                     print("COOLING IS ON")
                 elif heatingRECIEVED == "1":
 
-                   
+                    (simulation.get_instance()).setCooling(0)
+                    (simulation.get_instance()).setHeating(1)
                     print("HEATING IS ON")
 
             if coolingRECIEVED == "0":
 
-                
+                (simulation.get_instance()).setCooling(0)
                 print("COOLING IS OFF")
             if heatingRECIEVED == "0":
 
-                
+                (simulation.get_instance()).setHeating(0)
                 print("HEATING IS OFF")
 
             if coolingRECIEVED == heatingRECIEVED:
 
                 
                 print("NEITHER ARE ON")
-
-    
-    
-
 
 
     networking.loop()
