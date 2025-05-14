@@ -20,7 +20,7 @@ if node_type == NODE_TYPE_SIMULATED:
 if node_type == NODE_TYPE_PRIMARY or node_type == NODE_TYPE_SIMULATED:
     import primary_control_node
     functions.append(primary_control_node.loop)
-if node_type == NODE_TYPE_SECONDARY or node_type == NODE_TYPE_SIMULATED:
+if node_type == NODE_TYPE_SECONDARY:
     import secondary_control_node
     functions.append(secondary_control_node.loop)
 if node_type == NODE_TYPE_TEMPERATURE or node_type == NODE_TYPE_SIMULATED:

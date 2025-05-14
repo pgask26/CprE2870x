@@ -6,8 +6,8 @@ import networking
 import command
 import node_config
 import simulation
-if node_type == NODE_TYPE_SIMULATED:
-    import secondary_control_node
+# if node_type == NODE_TYPE_SIMULATED:
+#     import secondary_control_node
 from adafruit_motor import servo
 
 # --------------------------
@@ -40,6 +40,7 @@ desDamper3 = "0"
 _last_heartbeat_ns = 0
 
 currentlyunderwork = "none"
+currentlyunderwork2 = "none"
 
 # --------------------------
 # MQTT Message Handling
@@ -127,6 +128,7 @@ def loop():
     global desDamper1, desDamper2, desDamper3
     global temp1, temp2, temp3
     global currentlyunderwork
+    global currentlyunderwork2
 
 
     #print("=== Current System State ===")
@@ -200,7 +202,7 @@ def loop():
                     setXDamper(100, 2)
                     currentlyunderwork = "none"
             
-    else:
+    else:#SECOND HALF STARTS HERE
         if MODE_TYPE == "0":  # MANUAL
             print("RUNNING MANUAL")
             #TBD
@@ -208,56 +210,68 @@ def loop():
         elif MODE_TYPE == "1":  # AUTOMATIC
             print("RUNNING AUTOMATIC IN PRIMARY")
             
-            if (currentlyunderwork == "none"):
+            if (currentlyunderwork2 == "none"):
                 #setAllDampers(100)
-                (simulation.get_instance()).setCooling(0)
-                (simulation.get_instance()).setHeating(0)
+                (simulation.get_instance()).set_damper(0,100)
+                (simulation.get_instance()).set_damper(1,100)
+                (simulation.get_instance()).set_damper(2,100)
+            
+                
+                (simulation.get_instance()).setCooling(False)
+                (simulation.get_instance()).setHeating(False)
+
                 
 
-            if (currentlyunderwork == "none") or (currentlyunderwork == "one"):
-                if abs(int(destemp1) - int(temp1)) >= 1:
-                    currentlyunderwork = "one"
-                    if int(destemp1) > int(temp1):
-                        (simulation.get_instance()).setCooling(0)
-                        (simulation.get_instance()).setHeating(1)
-                    elif int(destemp1) < int(temp1):
-                        (simulation.get_instance()).setCooling(1)
-                        (simulation.get_instance()).setHeating(0)
+            if (currentlyunderwork2 == "none") or (currentlyunderwork2 == "one"):
+                if abs(int(destemp1) - int((simulation.get_instance()).zoneTemps[0])) >= 1:
+                    currentlyunderwork2 = "one"
+                    if int(destemp1) > int((simulation.get_instance()).zoneTemps[0]):
+                        (simulation.get_instance()).setCooling(False)
+                        (simulation.get_instance()).setHeating(True)
+                    elif int(destemp1) < int((simulation.get_instance()).zoneTemps[0]):
+                        (simulation.get_instance()).setCooling(True)
+                        (simulation.get_instance()).setHeating(False)
                     
                     #setXDamper(0, 0)
+                    (simulation.get_instance()).set_damper(0,100)
                 else:
                     #setXDamper(100, 0)
-                    currentlyunderwork = "none"
+                    (simulation.get_instance()).set_damper(0,0)
+                    currentlyunderwork2 = "none"
 
-            if (currentlyunderwork == "none") or (currentlyunderwork == "two"):
-                if abs(int(destemp2) - int(temp2)) >= 1:
-                    currentlyunderwork = "two"
-                    if int(destemp2) > int(temp2):
-                        (simulation.get_instance()).setCooling(0)
-                        (simulation.get_instance()).setHeating(1)
-                    elif int(destemp2) < int(temp2):
-                        setHeatMode(0)
-                        setCoolMode(1)
+            if (currentlyunderwork2 == "none") or (currentlyunderwork2 == "two"):
+                if abs(int(destemp2) - int((simulation.get_instance()).zoneTemps[1])) >= 1:
+                    currentlyunderwork2 = "two"
+                    if int(destemp2) > int((simulation.get_instance()).zoneTemps[1]):
+                        (simulation.get_instance()).setCooling(False)
+                        (simulation.get_instance()).setHeating(True)
+                    elif int(destemp2) < int((simulation.get_instance()).zoneTemps[1]):
+                        (simulation.get_instance()).setCooling(True)
+                        (simulation.get_instance()).setHeating(False)
 
                     #setXDamper(0, 1)
+                    (simulation.get_instance()).set_damper(1,100)
                 else:
                     #setXDamper(100, 1)
-                    currentlyunderwork = "none"
+                    (simulation.get_instance()).set_damper(1,0)
+                    currentlyunderwork2 = "none"
 
-            if (currentlyunderwork == "none") or (currentlyunderwork == "three"):
-                if abs(int(destemp3) - int(temp3)) >= 1:
-                    currentlyunderwork = "three"
-                    if int(destemp3) > int(temp3):
-                        (simulation.get_instance()).setCooling(0)
-                        (simulation.get_instance()).setHeating(1)
-                    elif int(destemp3) < int(temp3):
-                        (simulation.get_instance()).setCooling(1)
-                        (simulation.get_instance()).setHeating(0)
+            if (currentlyunderwork2 == "none") or (currentlyunderwork2 == "three"):
+                if abs(int(destemp3) - int((simulation.get_instance()).zoneTemps[2])) >= 1:
+                    currentlyunderwork2 = "three"
+                    if int(destemp3) > int((simulation.get_instance()).zoneTemps[2]):
+                        (simulation.get_instance()).setCooling(False)
+                        (simulation.get_instance()).setHeating(True)
+                    elif int(destemp3) < int((simulation.get_instance()).zoneTemps[2]):
+                        (simulation.get_instance()).setCooling(True)
+                        (simulation.get_instance()).setHeating(False)
 
                     #setXDamper(0, 2)
+                    (simulation.get_instance()).set_damper(2,100)
                 else:
                     #setXDamper(100, 2)
-                    currentlyunderwork = "none"
+                    (simulation.get_instance()).set_damper(2,0)
+                    currentlyunderwork2 = "none"
             
             #TBD
 
@@ -280,13 +294,13 @@ def publishDampers():
             networking.mqtt_publish_message(networking.DAMPER_FEEDS[i], angle_percent)
     else:
         
-        angle_percent = round(float(desDamper1))
+        angle_percent = (simulation.get_instance()).dampPerct[0]
         networking.mqtt_publish_message(networking.DAMPER_FEEDS[0], angle_percent)
         
-        angle_percent = round(float(desDamper2))
+        angle_percent = (simulation.get_instance()).dampPerct[1]
         networking.mqtt_publish_message(networking.DAMPER_FEEDS[1], angle_percent)
 
-        angle_percent = round(float(desDamper3))
+        angle_percent = (simulation.get_instance()).dampPerct[2]
         networking.mqtt_publish_message(networking.DAMPER_FEEDS[2], angle_percent)
 
 def setHeatMode(mode): #1 or 0

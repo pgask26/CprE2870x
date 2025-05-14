@@ -45,7 +45,7 @@ def loop():
         for zone in range(num_zones):
             tempFromZone = (simulation.get_instance()).get_temperature_f(zone)
             #print("HELP ME HELPPP" + str(tempFromZone))
-            time.sleep(1)
+            #time.sleep(1)
             networking.mqtt_publish_message(networking.TEMP_FEEDS[zone], tempFromZone)
         
     curr_time = time.monotonic_ns()

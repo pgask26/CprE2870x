@@ -32,7 +32,7 @@ class Simulation:
            self.zoneTemps.append(i)
            self.dampPerct.append(i)
            self.zoneTemps[i] = 65.0 #whatever inital temperture here
-           self.dampPerct[i] = 100/100 #whatever inital temperture here
+           self.dampPerct[i] = 100 #whatever inital temperture here
         
 
     # Returns the current temperature in the zone specified by zone_id
@@ -44,7 +44,7 @@ class Simulation:
     # specified by percent. 0 is closed, 100 is fully open.
     def set_damper(self, zone_id, percent):
 
-        self.dampPerct[zone_id] = percent/100
+        self.dampPerct[zone_id] = percent
 
     # Update the temperatures of the zones, given that elapsed_time_ms milliseconds
     # have elapsed since this was previously called.
@@ -56,9 +56,9 @@ class Simulation:
             self.zoneTemps[i] -= 0.1 #AMBI TEMP VARYMENT HERE
 
             if self.heating:
-                self.zoneTemps[i] += 1 * self.dampPerct[i] * elapsedTimeSeconds
+                self.zoneTemps[i] += 1 * self.dampPerct[i]/100 
             if self.cooling:
-                self.zoneTemps[i] -= 1 * self.dampPerct[i] * elapsedTimeSeconds
+                self.zoneTemps[i] -= 1 * self.dampPerct[i]/100
 
     
     # Runs periodic simulation actions.
